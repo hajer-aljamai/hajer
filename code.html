@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUDS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #222222;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .pa {
+            width: 100%;
+            height: 30px;
+            border: none;
+            cursor: pointer;
+            background: #810e70;
+            color: #ffffff;
+            border-radius: 20px;
+            transition: 0.5s;
+            text-align: center;
+        }
+
+        .crud {
+            width: 80%;
+            margin: auto;
+        }
+
+        .head {
+            text-align: center;
+            text-transform: uppercase;
+            margin: 10px 0;
+        }
+
+        input {
+            width: 100%;
+            height: 30px;
+            outline: none;
+            border: none;
+            background: #111111;
+            margin: 4px 0;
+            border-radius: 4px;
+            padding: 4px;
+            color: #ffffff;
+        }
+
+        input:focus {
+            background: #000000;
+            transform: scale(1.1);
+        }
+
+        .price input {
+            width: 20%;
+        }
+
+        #total {
+            background: #6b0c5b;
+            padding: 5px 2px;
+            border-radius: 4px;
+        }
+
+        #total::before {
+            content: 'TOTAL:';
+        }
+
+        button {
+            width: 100%;
+            height: 30px;
+            border: none;
+            cursor: pointer;
+            background: #810e68;
+            color: #ffffff;
+            border-radius: 20px;
+            transition: 0.5s;
+        }
+
+        button:hover {
+            background: #ca178e;
+            letter-spacing: 2px;
+        }
+
+        .btnsearch {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btnsearch button {
+            width: 45%;
+        }
+
+        #deleteall {
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        table th {
+            text-transform: uppercase;
+        }
+
+        th,
+        td {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <p class="pa">هاجر عبد العليم الجماعي</p>
+    <div class="crud">
+        <div class="head">
+        
+            <p>Holy Qwran Application</p>
+        </div>
+        <div class="inputs">
+            <input type="text" id="title" placeholder="Title">
+            <div class="price">
+                <input onkeyup="getTotal()" type="number" id="Surah" placeholder="Surah">
+                <input onkeyup="getTotal()" type="number" id="ads" placeholder="ads">
+                <small id="total"> 0 </small>
+            </div>
+            <input type="number" id="Ayah" placeholder="Ayah"
+            <input type="text" id="category" placeholder="category">
+            <button id="submit">CREATE</button>
+        </div>
+        <div class="outputs">
+            <div class="serchblock">
+                <input onkeyup="searchdata(this.value)" type="text" id="search" placeholder="search">
+                <div class="btnsearch">
+                    <button onclick="getsearchmood(this.id)" id="searchtitle">search by title</button>
+                    <button onclick="getsearchmood(this.id)" id="searchcategory">search by category</button>
+                </div>
+            </div>
+            <div id="deleteall"></div>
+            <table>
+                <tr>
+                    <th>id</th>
+                    <th>title</th>
+                    <th>price</th>
+                    <th>taxes</th>
+                    <th>ads</th>
+                    <th>discount</th>
+                    <th>total</th>
+                    <th>category</th>
+                    <th>update</th>
+                    <th>delete</th>
+                </tr>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let title = document.getElementById('title');
+        let taxes = document.getElementById('taxes');
+        let ads = document.getElementById('ads');
+        let discount = document.getElementById('discount');
+        let count = document.getElementById('count');
+        let category = document.getElementById('category');
+        let submit = document.getElementById('submit');
+
+        let mood = 'create';
+        let tmp;
+
+        function getTotal() {
+            if (price.value != '') {
+                let result = (+price.value + +taxes.value + +ads.value) - +discount.value;
+                total.innerHTML = result;
+                total.style.background = '#040';
+            } else {
+                total.innerHTML = '';
+                total.style.background = '#6b0c0c';
+            }
+        }
+
+        let datapro;
+        if (localStorage.product != null) {
+            datapro = JSON.parse(localStorage.product);
+        } else {
+            datapro = [];
+        }
+
+        submit.onclick = function () {
+            let newpro = {
+                title: title.value.toLowerCase(),
+                taxes: taxes.value,
+                ads: ads.value,
+                discount: discount.value,
+                total: total.innerHTML,
+                count: count.value,
+                category: category.value.toLowerCase(),
+            }
+
+            if (title.value != '' && price.value != '' && category.value != '' && newpro.count <= 100) {
+                if (mood === 'create') {
+                    if (newpro.count > 1) {
+                        for (let i = 0; i < newpro.count; i++) {
+                            datapro.push(newpro);
+                        }
+                    } else {
+                        datapro.push(newpro);
+                    }
+                } else {
+                    datapro[tmp] = newpro;
+                    mood = 'create';
+                    submit.innerHTML = 'CREATE';
+                    count.style.display = 'block';
+                }
+                cleardata();
+            }
+            localStorage.setItem('product', JSON.stringify(datapro));
+            showdata();
+        }
+
+        function cleardata() {
+            title.value = '';
+            price.value = '';
+            taxes.value = '';
+            ads.value = '';
+            discount.value = '';
+            total.innerHTML = '';
+            count.value = '';
+            category.value = '';
+        }
+
+        function showdata() {
+            getTotal();
+            let table = '';
+            for (let i = 0; i < datapro.length; i++) {
+                table += `<tr>
+                    <td> ${i} </td>
+                    <td> ${datapro[i].title} </td>
+                    <td>${datapro[i].price} </td>
+                    <td>${datapro[i].taxes} </td>
+                    <td>${datapro[i].ads} </td>
+                    <td>${datapro[i].discount} </td>
+                    <td>${datapro[i].total} </td>
+                    <td>${datapro[i].category} </td>
+                    <td><button onclick="updatedata(${i})" id="update">update</button></td>
+                    <td><button onclick="deletedata(${i})" id="delete">delete</button></td>
+                </tr>`;
+            }
+            document.getElementById('tbody').innerHTML = table;
+
+            let btndelete = document.getElementById('deleteall')
+            if (datapro.length > 0) {
+                btndelete.innerHTML = `<button onclick="deleteall()">delete All (${datapro.length})</button>`;
+            } else {
+                btndelete.innerHTML = '';
+            }
+        }
+        showdata();
+
+        function deletedata(i) {
+            datapro.splice(i, 1);
+            localStorage.product = JSON.stringify(datapro);
+            showdata();
+        }
+
+        function deleteall() {
+            localStorage.clear();
+            datapro.splice(0);
+            showdata();
+        }
+
+        function updatedata(i) {
+            title.value = datapro[i].title;
+            price.value = datapro[i].price;
+            taxes.value = datapro[i].taxes;
+            ads.value = datapro[i].ads;
+            discount.value = datapro[i].discount;
+            getTotal();
+            count.style.display = 'none';
+            category.value = datapro[i].category;
+            submit.innerHTML = 'Update';
+            mood = 'update';
+            tmp = i;
+            scroll({ top: 0, behavior: 'smooth' })
+        }
+
+        let searchmood = 'title';
+        function getsearchmood(id) {
+            let search = document.getElementById('search');
+            if (id == 'searchtitle') {
+                searchmood = 'title';
+            } else {
+                searchmood = 'category';
+            }
+            search.placeholder = 'Search By ' + searchmood;
+            search.focus();
+            search.value = '';
+            showdata();
+        }
+
+        function searchdata(value) {
+            let table = '';
+            for (let i = 0; i < datapro.length; i++) {
+                if (searchmood == 'title') {
+                    if (datapro[i].title.includes(value.toLowerCase())) {
+                        table += `<tr>
+                    <td> ${i} </td>
+                    <td> ${datapro[i].title} </td>
+                    
+                    <td>${datapro[i].category} </td>
+                    <td><button onclick="updatedata(${i})" id="update">update</button></td>
+                    <td><button onclick="deletedata(${i})" id="delete">delete</button></td>
+                </tr>`;
+                    }
+                } else {
+                    if (datapro[i].category.includes(value.toLowerCase())) {
+                        table += `<tr>
+                    <td> ${i} </td>
+                    <td> ${datapro[i].title} </td>
+                    <td>${datapro[i].ads} </td>
+                    <td>${datapro[i].discount} </td>
+                    <td>${datapro[i].total} </td>
+                    <td><button onclick="updatedata(${i})" id="update">update</button></td>
+                    <td><button onclick="deletedata(${i})" id="delete">delete</button></td>
+                </tr>`;
+                    }
+                }
+            }
+            document.getElementById('tbody').innerHTML = table;
+        }
+    </script>
+</body>
+</html>
